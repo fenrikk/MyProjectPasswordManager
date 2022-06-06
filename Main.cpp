@@ -6,7 +6,6 @@
 #include "string"
 #include <fstream>
 #include <iomanip>
-#include <windows.h>
 
 using namespace std;
 
@@ -17,9 +16,6 @@ void clear() {
 }
 
 int main() {
-	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-	SetConsoleTextAttribute(hConsole, 10);
-
 	bool isLogged = false;
 
 	cout << "Hello! I am password manager created by Nikita Stukalov, s24518, 99c" << endl;
@@ -28,6 +24,7 @@ int main() {
 	cin >> entered;
 
 	encrypter encrypterProfile(ENCRYPTING_KEY);
+	encrypter encrypterData(ENCRYPTING_KEY);
 
 	if (entered == "login") {
 		clear();
@@ -44,7 +41,7 @@ int main() {
 
 		if (login == encrypterProfile.decrypt(encryptedLogin) && password == encrypterProfile.decrypt(encryptedPassword)) {
 			clear();
-			cout << "Welcome back " << login << endl;
+			cout << "Welcome back, " << login << "!" << endl;
 			cout << "Last login: " << put_time(localtime(&lastLogin), "%c") << endl;
 			inputStream.close();
 			ofstream outStream("Profile.txt");
@@ -73,7 +70,7 @@ int main() {
 		outStream << encrypterProfile.encrypt(login) << " " << encrypterProfile.encrypt(password) << " " << result;
 		outStream.close();
 		clear();
-		cout << login <<" profile created" << endl;
+		cout << login <<" profile created!" << endl;
 		isLogged = true;
 	}
 	else {
@@ -83,15 +80,26 @@ int main() {
 	if (isLogged) {
 		cout << "Choose you want" << endl;
 		cout << "1: Find password by service name" << endl;
-		cout << "2: Add password" << endl;
-		cout << "3: Edit password" << endl;
-		cout << "4: Remove password" << endl;
+		cout << "2: Get all passwords" << endl;
+		cout << "3: Add password" << endl;
+		cout << "4: Edit password" << endl;
+		cout << "5: Remove password" << endl;
 		encrypter encrypterData(ENCRYPTING_KEY);
 		manager manager(encrypterData);
 		int action;
 		cin >> action;
-		if (action == 1) {}
-		else if(action == 2){
+		if (action == 1) {
+			string name;
+			clear();
+			cout << "Enter service name " << endl;
+			cin >> name;
+			manager.getPasswordByName(name);
+		}
+		if (action == 2) {
+			clear();
+			manager.getAllPasswords();
+		}
+		else if(action == 3){
 			clear();
 			int actionOnSecond;
 			cout << "Choose you want" << endl;
@@ -150,8 +158,23 @@ int main() {
 				return -1;
 			}
 		}
-		else if(action == 3){}
-		else if(action == 4){}
+		else if(action == 4){
+			clear();
+			string name, password;
+			cout << "Enter a name of password you want to edit: " << endl;
+			cin >> name;
+			cout << "Enter a new password: " << endl;
+			cin >> password;
+			manager.editPasswordByName(name, password);
+		
+		}
+		else if(action == 5){
+			clear();
+			string name;
+			cout << "Enter a name of password you want to remove: ";
+			cin >> name;
+			manager.removePasswordByName(name);
+		}
 		else {
 			return -1;
 		}

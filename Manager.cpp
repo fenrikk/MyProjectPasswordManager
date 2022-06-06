@@ -1,8 +1,9 @@
 #include "fstream"
 #include "Encrypter.h"
 #include "Manager.h"
+#include <iostream>
+#include <vector>
 
-	
 manager::manager(encrypter _enc)
 {
 	enc = _enc;
@@ -87,3 +88,108 @@ void manager::addPassword(int length, bool useUpperCase, bool useSympols, std::s
 	stream.close();
 }
 
+void manager::getAllPasswords()
+{
+	std::ifstream inputStream("UserData.txt");
+	std::string line;
+	while (inputStream.good()) {
+		std::string name, password, category, url, login;
+		inputStream >> name >> password >> category >> url >> login;
+		std::cout << enc.decrypt(name) << " " << enc.decrypt(password) << " " << enc.decrypt(category) << " " << enc.decrypt(url) << " " << enc.decrypt(login) << std::endl;
+	}
+	inputStream.close();
+}
+
+void manager::getPasswordByName(std::string _name)
+{
+	std::ifstream inputStream("UserData.txt");
+	std::string line;
+	while (inputStream.good()) {
+		std::string name, password, category, url, login;
+		inputStream >> name >> password >> category >> url >> login;
+		if (_name == enc.decrypt(name)) {
+			std::cout << enc.decrypt(password) << std::endl;
+		}
+	}
+	inputStream.close();
+}
+
+void manager::editPasswordByName(std::string _name, std::string newPassword)
+{
+	std::ifstream inputStream("UserData.txt");
+	std::string line;
+	std::vector<std::string> names;
+	std::vector<std::string> passwords;
+	std::vector<std::string> categorys;
+	std::vector<std::string> urls;
+	std::vector<std::string> logins;
+	int lineNumber = -1;
+	for (int i = 0; inputStream.good(); i++) {
+		std::string name, password, category, url, login;
+		inputStream >> name >> password >> category >> url >> login;
+		name = enc.decrypt(name);
+		password = enc.decrypt(password);
+		category = enc.decrypt(category);
+		url = enc.decrypt(url);
+		login = enc.decrypt(login);
+		names.push_back(name);
+		passwords.push_back(password);
+		categorys.push_back(category);
+		urls.push_back(url);
+		logins.push_back(login);
+		if (_name == name) {
+			lineNumber = i;
+		}
+	};
+	inputStream.close();
+	std::ofstream clearStream("UserData.txt", std::ios::trunc);
+	clearStream.close();
+	passwords.at(lineNumber) = newPassword;
+	std::ofstream stream("UserData.txt", std::ofstream::app);
+	for (int i = 0; i < names.size(); i++) {
+		stream << enc.encrypt(names.at(i)) << " " << enc.encrypt(passwords.at(i)) << " " << enc.encrypt(categorys.at(i)) << " " << enc.encrypt(urls.at(i)) << " " << enc.encrypt(logins.at(i)) << "\n";
+	}
+	stream.close();
+}
+
+void manager::removePasswordByName(std::string _name)
+{
+	std::ifstream inputStream("UserData.txt");
+	std::string line;
+	std::vector<std::string> names;
+	std::vector<std::string> passwords;
+	std::vector<std::string> categorys;
+	std::vector<std::string> urls;
+	std::vector<std::string> logins;
+	int lineNumber = -1;
+	for (int i = 0; inputStream.good(); i++) {
+		std::string name, password, category, url, login;
+		inputStream >> name >> password >> category >> url >> login;
+		name = enc.decrypt(name);
+		password = enc.decrypt(password);
+		category = enc.decrypt(category);
+		url = enc.decrypt(url);
+		login = enc.decrypt(login);
+		names.push_back(name);
+		passwords.push_back(password);
+		categorys.push_back(category);
+		urls.push_back(url);
+		logins.push_back(login);
+		if (_name == name) {
+			lineNumber = i;
+		}
+	};
+	inputStream.close();
+	std::ofstream clearStream("UserData.txt", std::ios::trunc);
+	clearStream.close();
+	names.erase(names.begin() + lineNumber);
+	passwords.erase(passwords.begin() + lineNumber);
+	categorys.erase(categorys.begin() + lineNumber);
+	urls.erase(urls.begin() + lineNumber);
+	logins.erase(logins.begin() + lineNumber);
+	std::ofstream stream("UserData.txt", std::ofstream::app);
+	for (int i = 0; i < names.size(); i++) {
+		stream << enc.encrypt(names.at(i)) << " " << enc.encrypt(passwords.at(i)) << " " << enc.encrypt(categorys.at(i)) << " " << enc.encrypt(urls.at(i)) << " " << enc.encrypt(logins.at(i)) << "\n";
+	}
+	stream.close();
+}
